@@ -70,7 +70,7 @@ require('lazy').setup({
     'ziglang/zig.vim',
 
     -- Colorschemes
-    { 'endel/vim-github-colorscheme', lazy = true },
+    'endel/vim-github-colorscheme',
 
     -- Lualine
     { 'nvim-lualine/lualine.nvim', config = true, opts = { options = { theme = 'ayu_light' } } },
@@ -106,12 +106,11 @@ require('lazy').setup({
     -- Treesitter
     {
         'nvim-treesitter/nvim-treesitter',
-        -- ft = code_file_types,
+        ft = code_file_types,
         build = ':TSUpdate',
-        -- lazy = true,
+        lazy = true,
         config = function()
             require('nvim-treesitter.install').compilers = { 'clang', 'gcc' }
-            require('nvim-treesitter.install').prefer_git = false
 
             require('nvim-treesitter.configs').setup {
                 ensure_installed = code_file_types,

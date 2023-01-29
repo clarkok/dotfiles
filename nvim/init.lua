@@ -177,11 +177,11 @@ require('lazy').setup({
     {
         'nvim-tree/nvim-tree.lua',
         lazy = true,
-        keys = { '<c-[>' },
+        keys = { '<c-/>' },
         cmd = { 'NvimTreeToggle', 'NvimTreeFocus', 'NvimTreeFindFile' },
         config = function () 
             require('nvim-tree').setup()
-            Map('n', '<c-[>', ':NvimTreeToggle<cr>', { noremap = true, silent = true })
+            Map('n', '<c-/>', ':NvimTreeToggle<cr>', { noremap = true, silent = true })
         end
     },
     { 'nvim-lua/plenary.nvim', lazy = true },
@@ -198,7 +198,14 @@ require('lazy').setup({
         dependencies = { 'nvim-lua/plenary.nvim', 'nvim-telescope/telescope-fzf-native.nvim' },
         config = function ()
             local builtin = require('telescope.builtin')
-            vim.keymap.set('n', '<backspace>', builtin.find_files, {})
+            local extending = require('extend-file-sorter')
+
+            local smart_find_files = function ()
+                extending.start()
+                builtin.find_files()
+            end
+
+            vim.keymap.set('n', '<backspace>', smart_find_files, {})
             vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
             vim.keymap.set('n', '<leader>fr', builtin.lsp_references, {})
             vim.keymap.set('n', '<leader>fd', builtin.diagnostics, {})
@@ -223,6 +230,9 @@ require('lazy').setup({
             }
 
             require('telescope').load_extension('fzf')
+
+            local config_values = require('telescope.config').values
+            config_values.file_sorter = extending.wrap(config_values.file_sorter)
         end
     },
     { 'tpope/vim-fugitive', lazy = true, cmd = {'G', 'Git', 'Gcommit'} },

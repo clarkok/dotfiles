@@ -73,8 +73,23 @@ require('lazy').setup({
     'endel/vim-github-colorscheme',
 
     -- Lualine
-    { 'nvim-lualine/lualine.nvim', config = true, opts = { options = { theme = 'ayu_light' } } },
+    { 'jcdickinson/wpm.nvim', config = true },
     'kyazdani42/nvim-web-devicons',
+    {
+        'nvim-lualine/lualine.nvim',
+        config = true,
+        dependencies = { 'kyazdani42/nvim-web-devicons', 'jcdickinson/wpm.nvim' },
+        config = function ()
+            local wpm = require('wpm')
+            require('lualine').setup {
+                options = { theme = 'ayu_light' },
+                sections = {
+                    lualine_c = { function () return vim.fn.expand('%') end },
+                    lualine_x = { require('wpm').wpm, require('wpm').historic_graph }
+                }
+            }
+        end
+    },
 
     -- Editing
     { 'raimondi/delimitMate', lazy = true, ft = code_file_types },

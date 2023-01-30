@@ -13,10 +13,9 @@ vim.o.foldmethod = 'syntax'
 vim.o.foldnestmax = 10
 vim.o.foldenable = false
 vim.o.foldlevel = 2
-vim.o.backspace = 2
+vim.o.backspace = 'indent,eol,start'
 vim.o.incsearch = true
 vim.o.updatetime = 300
-vim.o.ttyfast = true
 vim.o.shortmess = 'filnxtToOFc'
 vim.o.scrolloff = 10
 vim.o.guifont = 'Consolas:h8'
@@ -92,8 +91,23 @@ require('lazy').setup({
     },
 
     -- Editing
-    { 'raimondi/delimitMate', lazy = true, ft = code_file_types },
     { 'kamykn/CCSpellCheck.vim', lazy = true, ft = code_file_types },
+    {
+        'windwp/nvim-autopairs',
+        lazy = true,
+        ft = code_file_types,
+        opts = {
+            enable_check_bracket_line = false,
+            ignored_next_char = "[%w%.]" 
+        }
+    },
+    {
+        'windwp/nvim-ts-autotag',
+        lazy = true,
+        ft = 'html',
+        config = true,
+        dependencies = { 'nvim-treesitter/nvim-treesitter' }
+    },
     {
         'github/copilot.vim',
         lazy = true,
@@ -110,9 +124,9 @@ require('lazy').setup({
         cmd = 'Neoformat',
         config = function ()
             local group = Augroup('NeoFormat', {})
-            vim.api.Autocmd('BufWritePre', {
+            Autocmd('FileType', {
                 pattern = neo_format_types,
-                command = 'undojoin | Neoformat',
+                command = 'autocmd! BufWritePre * undojoin | Neoformat',
                 group = group
             })
         end
@@ -208,18 +222,21 @@ require('lazy').setup({
         'nvim-telescope/telescope.nvim',
         lazy = true,
         tag = '0.1.1',
-        keys = { '<backspace>' },
+        keys = { 
+            {
+                '<backspace>',
+                function ()
+                    require('extend-file-sorter').start()
+                    require('telescope.builtin').find_files()
+                end,
+                mode = 'n'
+            }
+        },
         dependencies = { 'nvim-lua/plenary.nvim', 'nvim-telescope/telescope-fzf-native.nvim' },
         config = function ()
             local builtin = require('telescope.builtin')
             local extending = require('extend-file-sorter')
 
-            local smart_find_files = function ()
-                extending.start()
-                builtin.find_files()
-            end
-
-            vim.keymap.set('n', '<backspace>', smart_find_files, {})
             vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
             vim.keymap.set('n', '<leader>fr', builtin.lsp_references, {})
             vim.keymap.set('n', '<leader>fd', builtin.diagnostics, {})
@@ -253,11 +270,20 @@ require('lazy').setup({
 
     -- LSP
     { 'ray-x/lsp_signature.nvim', lazy = true },
+    { 'williamboman/mason.nvim', lazy = true, config = true },
+    {
+        'williamboman/mason-lspconfig.nvim',
+        lazy = true,
+        dependencies = 'williamboman/mason.nvim',
+        opts = {
+            ensure_installed = { 'clangd', 'rust_analyzer', 'tsserver' }
+        }
+    },
     {
         'neovim/nvim-lspconfig',
         lazy = true,
         ft = code_file_types,
-        dependencies = { 'ray-x/lsp_signature.nvim', 'hrsh7th/nvim-cmp' },
+        dependencies = { 'ray-x/lsp_signature.nvim', 'hrsh7th/nvim-cmp', 'williamboman/mason-lspconfig.nvim' },
         config = function ()
             local nvim_lsp = require('lspconfig');
             local capabilities = require('cmp_nvim_lsp').default_capabilities()
@@ -298,20 +324,24 @@ require('lazy').setup({
             end
 
             nvim_lsp.clangd.setup {
-                on_attach = on_attach,
+                on_attach,
                 cmd = { 'C:\\Program Files\\LLVM\\bin\\clangd.exe', '--pch-storage=memory', compile_commands_dir, '--background-index' },
                 capabilities
             }
 
             nvim_lsp.tsserver.setup {
-                on_attach = on_attach,
+                on_attach,
                 capabilities
             }
 
             nvim_lsp.rust_analyzer.setup {
-                on_attach = on_attach,
+                on_attach,
                 capabilities,
-                cmd = { 'rustup.exe', 'run', 'stable', 'rust-analyzer' }
+            }
+
+            nvim_lsp.sumneko_lua.setup {
+                on_attach,
+                capabilities,
             }
 
             Autocmd('BufWritePre', {
@@ -342,6 +372,15 @@ require('lazy').setup({
         'hrsh7th/nvim-cmp',
         lazy = true,
         ft = code_file_types,
+        dependencies = {
+            'hrsh7th/vim-vsnip',
+            'hrsh7th/vim-vsnip-integ',
+            'hrsh7th/cmp-nvim-lsp',
+            'hrsh7th/cmp-buffer',
+            'hrsh7th/cmp-path',
+            'hrsh7th/cmp-cmdline',
+            'windwp/nvim-autopairs',
+        },
         config = function ()
             local cmp = require('cmp')
 
@@ -412,6 +451,12 @@ require('lazy').setup({
                     { name = 'cmdline' }
                 })
             })
+
+            local cmp_autopairs = require('nvim-autopairs.completion.cmp')
+            cmp.event:on(
+                'confirm_done',
+                cmp_autopairs.on_confirm_done()
+            )
         end
     }
 })

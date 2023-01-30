@@ -81,10 +81,17 @@ require('lazy').setup({
         config = function ()
             local wpm = require('wpm')
             require('lualine').setup {
-                options = { theme = 'ayu_light' },
+                options = {
+                    theme = 'ayu_light',
+                    section_separators  = { left = '> ', right = ' <'},
+                    component_separators = { left = '> ', right = ' <'}
+                },
                 sections = {
                     lualine_c = { function () return vim.fn.expand('%') end },
-                    lualine_x = { require('wpm').wpm, require('wpm').historic_graph }
+                    lualine_x = {
+                        function () return 'WPM: ' .. require('wpm').wpm() .. require('wpm').historic_graph() end,
+                        function () return 'Buf: ' .. vim.fn.bufnr('%') end
+                    }
                 }
             }
         end

@@ -90,7 +90,7 @@ require('lazy').setup({
                     lualine_c = { function () return vim.fn.expand('%') end },
                     lualine_x = {
                         function () return 'WPM: ' .. require('wpm').wpm() .. require('wpm').historic_graph() end,
-                        function () return 'Buf: ' .. vim.fn.bufnr('%') end
+                        function () return 'Buf: ' .. table.getn(vim.api.nvim_list_bufs()) end
                     }
                 }
             }

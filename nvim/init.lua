@@ -329,19 +329,38 @@ require('lazy').setup({
             }
 
             -- clangd section
-            local compile_commands_dir;
-            if (vim.api.nvim_eval('getcwd() =~ "Storage.XStore.src"') ~= 0) then
-                compile_commands_dir = "--compile-commands-dir=" .. vim.api.nvim_eval('expand("~/.compiledb/XStore")');
-            elseif (vim.api.nvim_eval('filereadable(getcwd() . "/build/compile_commands.json")') ~= 0) then
-                compile_commands_dir = "--compile-commands-dir=" .. vim.api.nvim_eval('expand(getcwd() . "/build")')
+            local compile_commands_dir
+            local root_dir
+
+            local cwd = vim.fn.getcwd()
+            if (vim.regex('\\cStorage.XStore.src'):match_str(cwd)) then
+                compile_commands_dir = "--compile-commands-dir=" .. vim.fn.expand('~/.compiledb/XStore');
+                root_dir = cwd
+                print("XStore project detected", compile_commands_dir, root_dir)
+            elseif (vim.fn.filereadable(cwd .. '/build/compile_commands.json') ~= 0) then
+                compile_commands_dir = "--compile-commands-dir=" .. vim.fn.expand(cwd .. '/build')
+                root_dir = cwd
+                print("CMake project detected", compile_commands_dir, root_dir)
             else
                 compile_commands_dir = "--compile-commands-dir=./"
+                root_dir = require('lspconfig.util').root_pattern(
+                    '.clangd',
+                    '.clang-tidy',
+                    '.clang-format',
+                    'compile_commands.json',
+                    'compile_flags.txt',
+                    'configure.ac',
+                    '.git'
+                )(cwd)
+                print("Other project detected", compile_commands_dir, root_dir)
             end
 
             nvim_lsp.clangd.setup {
                 on_attach = on_attach,
                 capabilities = capabilities,
+                root_dir = function() return root_dir end,
                 cmd = { 'C:\\Program Files\\LLVM\\bin\\clangd.exe', '--pch-storage=memory', compile_commands_dir, '--background-index' },
+                -- cmd = { 'E:\\llvm-project-llvmorg-15.0.7\\llvm-project-llvmorg-15.0.7\\build\\Debug\\bin\\clangd.exe', '--pch-storage=memory', compile_commands_dir, '--background-index' },
             }
 
             Autocmd('BufWritePre', {
@@ -483,4 +502,15 @@ Autocmd('FileType', {
     pattern = 'markdown',
     command = 'set textwidth=120',
     group = markdownGroup
+})
+
+Autocmd('BufWritePost', {
+    pattern = '*',
+    callback = function (ev)
+        vim.defer_fn(function ()
+            if vim.fn.bufwinnr(ev.buf) == -1 then
+                vim.api.nvim_buf_delete(ev.buf, {})
+            end
+        end, 1000)
+    end
 })

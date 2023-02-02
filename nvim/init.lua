@@ -142,15 +142,6 @@ require('lazy').setup({
     -- Treesitter
     { 'nvim-treesitter/nvim-treesitter-textobjects', build = ':TSUpdate', lazy = true },
     {
-        'nvim-treesitter/nvim-treesitter-context',
-        lazy = true,
-        opts = {
-            enable = true,
-            max_lines = 5,
-            pattern = { cpp = { 'lambda_expression' } }
-        }
-    },
-    {
         'nvim-treesitter/nvim-treesitter',
         ft = code_file_types,
         build = ':TSUpdate',
@@ -298,19 +289,7 @@ require('lazy').setup({
 
             -- keybindings
             local on_attach = function(client, bufnr)
-                local opts = { noremap=true, silent=true, buffer=bufnr }
-
-                vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
-                vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
-                vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
-                vim.keymap.set('n', '<leader>D', vim.lsp.buf.type_definition, opts)
-                vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
-                vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action, opts)
-                vim.keymap.set('n', '<leader>=', vim.lsp.buf.formatting, opts)
-
                 require "lsp_signature".on_attach({ bind = true }, bufnr)
-
-                print("LSP attached ", bufnr)
             end
 
             nvim_lsp.tsserver.setup {
@@ -331,11 +310,13 @@ require('lazy').setup({
             -- clangd section
             local compile_commands_dir
             local root_dir
+            local clangd_exeutable = 'C:\\Program Files\\LLVM\\bin\\clangd.exe'
 
             local cwd = vim.fn.getcwd()
             if (vim.regex('\\cStorage.XStore.src'):match_str(cwd)) then
                 compile_commands_dir = "--compile-commands-dir=" .. vim.fn.expand('~/.compiledb/XStore');
                 root_dir = cwd
+                clangd_exeutable = 'E:\\llvm-project-llvmorg-15.0.7\\llvm-project-llvmorg-15.0.7\\build\\RelWithDebInfo\\bin\\clangd.exe'
                 print("XStore project detected", compile_commands_dir, root_dir)
             elseif (vim.fn.filereadable(cwd .. '/build/compile_commands.json') ~= 0) then
                 compile_commands_dir = "--compile-commands-dir=" .. vim.fn.expand(cwd .. '/build')
@@ -359,8 +340,7 @@ require('lazy').setup({
                 on_attach = on_attach,
                 capabilities = capabilities,
                 root_dir = function() return root_dir end,
-                cmd = { 'C:\\Program Files\\LLVM\\bin\\clangd.exe', '--pch-storage=memory', compile_commands_dir, '--background-index' },
-                -- cmd = { 'E:\\llvm-project-llvmorg-15.0.7\\llvm-project-llvmorg-15.0.7\\build\\Debug\\bin\\clangd.exe', '--pch-storage=memory', compile_commands_dir, '--background-index' },
+                cmd = { clangd_exeutable, '--pch-storage=memory', compile_commands_dir, '--background-index' },
             }
 
             Autocmd('BufWritePre', {
@@ -380,7 +360,23 @@ require('lazy').setup({
             })
         end
     },
+    {
+        'glepnir/lspsaga.nvim',
+        ft = code_file_types,
+        dependencies = { 'kyazdani42/nvim-web-devicons', 'neovim/nvim-lspconfig' },
+        config = function ()
+            require('lspsaga').setup({})
 
+            vim.keymap.set('n', 'K', '<cmd>Lspsaga hover_doc ++keep<CR>')
+            vim.keymap.set('n', 'gd', '<cmd>Lspsaga peek_definition<CR>')
+            vim.keymap.set('n', 'gD', '<cmd>Lspsaga goto_definition<CR>')
+            vim.keymap.set('n', '<leader>rn', '<cmd>Lspsaga rename ++project<CR>')
+            vim.keymap.set('n', '<leader>ca', '<cmd>Lspsaga code_action<CR>')
+        end,
+    },
+
+    -- Completion
+    { 'hrsh7th/nvim-cmp', lazy = true },
     { 'hrsh7th/vim-vsnip', lazy = true },
     { 'hrsh7th/vim-vsnip-integ', lazy = true },
     { 'hrsh7th/cmp-nvim-lsp', lazy = true },

@@ -4,7 +4,7 @@ local extending = {
 }
 
 extending.start = function ()
-    extending.current_file = vim.fn.expand('%:p')
+    extending.current_file = vim.fn.expand('%:~:.')
     extending.current_file_altered_prompt = vim.fn.fnamemodify(extending.current_file, ':t:r')
 end
 

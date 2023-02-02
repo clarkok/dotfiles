@@ -40,7 +40,7 @@ Map('n', '<c-j>', '<c-w>j', {noremap = true})
 Map('n', '<c-k>', '<c-w>k', {noremap = true})
 Map('n', '<c-l>', '<c-w>l', {noremap = true})
 
-local code_file_types = {'cpp', 'c', 'python', 'javascript', 'vim', 'rust', 'typescript', 'markdown', 'html', 'css', 'zig', 'lua'}
+local code_file_types = {'cpp', 'c', 'python', 'javascript', 'vim', 'rust', 'typescript', 'markdown', 'html', 'css', 'zig', 'lua', 'cmake'}
 local neo_format_types = {'javascript', 'typescript', 'rust'}
 local clang_format_black_pattern_list = { 'XTable', 'XBlobContainerServer' }
 
@@ -303,6 +303,11 @@ require('lazy').setup({
             }
 
             nvim_lsp.sumneko_lua.setup {
+                on_attach = on_attach,
+                capabilities = capabilities,
+            }
+
+            nvim_lsp.cmake.setup {
                 on_attach = on_attach,
                 capabilities = capabilities,
             }

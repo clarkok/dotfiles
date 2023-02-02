@@ -317,7 +317,7 @@ require('lazy').setup({
             local root_dir
             local clangd_exeutable = 'clangd'
 
-            if (vim.fn.executable('C:\\Program Files\\LLVM\\bin\\clangd.exe')) then
+            if (vim.fn.executable('C:\\Program Files\\LLVM\\bin\\clangd.exe') ~= 0) then
                 clangd_exeutable = 'C:\\Program Files\\LLVM\\bin\\clangd.exe'
             end
 
@@ -347,6 +347,7 @@ require('lazy').setup({
                 print("Other project detected", compile_commands_dir, root_dir)
             end
 
+            print("clangd executable: ", clangd_exeutable)
             nvim_lsp.clangd.setup {
                 on_attach = on_attach,
                 capabilities = capabilities,

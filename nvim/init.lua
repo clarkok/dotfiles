@@ -328,11 +328,9 @@ require('lazy').setup({
                 if (vim.fn.executable( 'E:\\llvm-project-llvmorg-15.0.7\\llvm-project-llvmorg-15.0.7\\build\\RelWithDebInfo\\bin\\clangd.exe')) then
                     clangd_exeutable = 'E:\\llvm-project-llvmorg-15.0.7\\llvm-project-llvmorg-15.0.7\\build\\RelWithDebInfo\\bin\\clangd.exe'
                 end
-                print("XStore project detected", compile_commands_dir, root_dir)
             elseif (vim.fn.filereadable(cwd .. '/build/compile_commands.json') ~= 0) then
                 compile_commands_dir = "--compile-commands-dir=" .. vim.fn.expand(cwd .. '/build')
                 root_dir = cwd
-                print("CMake project detected", compile_commands_dir, root_dir)
             else
                 compile_commands_dir = "--compile-commands-dir=./"
                 root_dir = require('lspconfig.util').root_pattern(
@@ -344,10 +342,8 @@ require('lazy').setup({
                     'configure.ac',
                     '.git'
                 )(cwd)
-                print("Other project detected", compile_commands_dir, root_dir)
             end
 
-            print("clangd executable: ", clangd_exeutable)
             nvim_lsp.clangd.setup {
                 on_attach = on_attach,
                 capabilities = capabilities,

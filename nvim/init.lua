@@ -73,11 +73,11 @@ require('lazy').setup({
 
     -- Lualine
     { 'jcdickinson/wpm.nvim', config = true },
-    'kyazdani42/nvim-web-devicons',
+    'nvim-tree/nvim-web-devicons',
     {
         'nvim-lualine/lualine.nvim',
         config = true,
-        dependencies = { 'kyazdani42/nvim-web-devicons', 'jcdickinson/wpm.nvim' },
+        dependencies = { 'nvim-tree/nvim-web-devicons', 'jcdickinson/wpm.nvim' },
         config = function ()
             local wpm = require('wpm')
             require('lualine').setup {
@@ -340,7 +340,7 @@ require('lazy').setup({
                 on_attach = on_attach,
                 capabilities = capabilities,
                 root_dir = function() return root_dir end,
-                cmd = { clangd_exeutable, '--pch-storage=memory', compile_commands_dir, '--background-index' },
+                cmd = { clangd_exeutable, '--pch-storage=memory', compile_commands_dir, '--background-index', '--offset-encoding=utf-16', '--clang-tidy' },
             }
 
             Autocmd('BufWritePre', {
@@ -363,9 +363,11 @@ require('lazy').setup({
     {
         'glepnir/lspsaga.nvim',
         ft = code_file_types,
-        dependencies = { 'kyazdani42/nvim-web-devicons', 'neovim/nvim-lspconfig' },
+        dependencies = { 'nvim-tree/nvim-web-devicons', 'neovim/nvim-lspconfig' },
         config = function ()
-            require('lspsaga').setup({})
+            require('lspsaga').setup({
+                lightbulb = { enable = false }
+            })
 
             vim.keymap.set('n', 'K', '<cmd>Lspsaga hover_doc ++keep<CR>')
             vim.keymap.set('n', 'gd', '<cmd>Lspsaga peek_definition<CR>')

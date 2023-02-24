@@ -40,7 +40,7 @@ Map('n', '<c-j>', '<c-w>j', {noremap = true})
 Map('n', '<c-k>', '<c-w>k', {noremap = true})
 Map('n', '<c-l>', '<c-w>l', {noremap = true})
 
-local code_file_types = {'cpp', 'c', 'python', 'javascript', 'vim', 'rust', 'typescript', 'markdown', 'html', 'css', 'zig', 'lua'}
+local code_file_types = {'cpp', 'c', 'python', 'javascript', 'vim', 'rust', 'typescript', 'markdown', 'html', 'css', 'zig', 'lua', 'cmake'}
 local neo_format_types = {'javascript', 'typescript', 'rust'}
 local clang_format_black_pattern_list = { 'XTable', 'XBlobContainerServer' }
 
@@ -307,12 +307,17 @@ require('lazy').setup({
                 capabilities = capabilities,
             }
 
+            nvim_lsp.cmake.setup {
+                on_attach = on_attach,
+                capabilities = capabilities,
+            }
+
             -- clangd section
             local compile_commands_dir
             local root_dir
             local clangd_exeutable = 'clangd'
 
-            if (vim.fn.executable('C:\\Program Files\\LLVM\\bin\\clangd.exe')) then
+            if (vim.fn.executable('C:\\Program Files\\LLVM\\bin\\clangd.exe') ~= 0) then
                 clangd_exeutable = 'C:\\Program Files\\LLVM\\bin\\clangd.exe'
             end
 
@@ -323,11 +328,9 @@ require('lazy').setup({
                 if (vim.fn.executable( 'E:\\llvm-project-llvmorg-15.0.7\\llvm-project-llvmorg-15.0.7\\build\\RelWithDebInfo\\bin\\clangd.exe')) then
                     clangd_exeutable = 'E:\\llvm-project-llvmorg-15.0.7\\llvm-project-llvmorg-15.0.7\\build\\RelWithDebInfo\\bin\\clangd.exe'
                 end
-                print("XStore project detected", compile_commands_dir, root_dir)
             elseif (vim.fn.filereadable(cwd .. '/build/compile_commands.json') ~= 0) then
                 compile_commands_dir = "--compile-commands-dir=" .. vim.fn.expand(cwd .. '/build')
                 root_dir = cwd
-                print("CMake project detected", compile_commands_dir, root_dir)
             else
                 compile_commands_dir = "--compile-commands-dir=./"
                 root_dir = require('lspconfig.util').root_pattern(
@@ -339,7 +342,6 @@ require('lazy').setup({
                     'configure.ac',
                     '.git'
                 )(cwd)
-                print("Other project detected", compile_commands_dir, root_dir)
             end
 
             nvim_lsp.clangd.setup {
@@ -360,7 +362,9 @@ require('lazy').setup({
                     end
 
                     if vim.fn.findfile('.clang-format', path .. ';') ~= '' then
-                        vim.lsp.buf.formatting_sync(nil, 3000)
+                        vim.lsp.buf.format({
+                            timeout_ms = 3000
+                        })
                     end
                 end
             })

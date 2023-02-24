@@ -376,9 +376,8 @@ require('lazy').setup({
             })
 
             vim.keymap.set('n', 'K', '<cmd>Lspsaga hover_doc ++keep<CR>')
-            vim.keymap.set('n', 'gd', '<cmd>Lspsaga peek_definition<CR>')
-            vim.keymap.set('n', 'gD', '<cmd>Lspsaga goto_definition<CR>')
-            vim.keymap.set('n', '<leader>rn', '<cmd>Lspsaga rename ++project<CR>')
+            vim.keymap.set('n', 'gd', '<cmd>Lspsaga goto_definition<CR>')
+            vim.keymap.set('n', '<leader>rn', '<cmd>Lspsaga rename<CR>')
             vim.keymap.set('n', '<leader>ca', '<cmd>Lspsaga code_action<CR>')
         end,
     },

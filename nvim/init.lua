@@ -312,6 +312,11 @@ require('lazy').setup({
                 capabilities = capabilities,
             }
 
+            nvim_lsp.zls.setup {
+                on_attach = on_attach,
+                capabilities = capabilities,
+            }
+
             -- clangd section
             local compile_commands_dir
             local root_dir

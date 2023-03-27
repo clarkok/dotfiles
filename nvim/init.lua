@@ -146,6 +146,7 @@ require('lazy').setup({
         ft = code_file_types,
         build = ':TSUpdate',
         lazy = true,
+        cmd = { 'TSInstall', 'TSUpdate', 'TSUpdateSync' },
         dependencies = { 'nvim-treesitter/nvim-treesitter-textobjects', 'nvim-treesitter/nvim-treesitter-context' },
         config = function()
             require('nvim-treesitter.install').compilers = { 'clang', 'gcc' }
@@ -330,7 +331,7 @@ require('lazy').setup({
             if (vim.regex('\\cStorage.XStore.src'):match_str(cwd)) then
                 compile_commands_dir = "--compile-commands-dir=" .. vim.fn.expand('~/.compiledb/XStore');
                 root_dir = cwd
-                if (vim.fn.executable( 'E:\\llvm-project-llvmorg-15.0.7\\llvm-project-llvmorg-15.0.7\\build\\RelWithDebInfo\\bin\\clangd.exe')) then
+                if (vim.fn.executable( 'E:\\llvm-project-llvmorg-15.0.7\\llvm-project-llvmorg-15.0.7\\build\\RelWithDebInfo\\bin\\clangd.exe') ~= 0) then
                     clangd_exeutable = 'E:\\llvm-project-llvmorg-15.0.7\\llvm-project-llvmorg-15.0.7\\build\\RelWithDebInfo\\bin\\clangd.exe'
                 end
             elseif (vim.fn.filereadable(cwd .. '/build/compile_commands.json') ~= 0) then

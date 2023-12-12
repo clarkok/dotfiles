@@ -62,3 +62,5 @@ wasm
 wiki
 wstring
 xnamespace
+auth
+Castable

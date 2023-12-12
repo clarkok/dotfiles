@@ -40,7 +40,7 @@ Map('n', '<c-j>', '<c-w>j', {noremap = true})
 Map('n', '<c-k>', '<c-w>k', {noremap = true})
 Map('n', '<c-l>', '<c-w>l', {noremap = true})
 
-local code_file_types = {'cpp', 'c', 'python', 'javascript', 'vim', 'rust', 'typescript', 'markdown', 'html', 'css', 'zig', 'lua', 'cmake'}
+local code_file_types = {'cpp', 'c', 'python', 'javascript', 'vim', 'rust', 'typescript', 'markdown', 'html', 'css', 'zig', 'lua', 'cmake', 'glsl'}
 local neo_format_types = {'javascript', 'typescript', 'rust'}
 local clang_format_black_pattern_list = { 'XTable', 'XBlobContainerServer' }
 
@@ -67,6 +67,7 @@ require('lazy').setup({
     'PProvost/vim-ps1',
     'rust-lang/rust.vim',
     'ziglang/zig.vim',
+    'tikhomirov/vim-glsl',
 
     -- Colorschemes
     'endel/vim-github-colorscheme',
@@ -270,7 +271,7 @@ require('lazy').setup({
 
     -- LSP
     { 'ray-x/lsp_signature.nvim', lazy = true },
-    { 'williamboman/mason.nvim', lazy = true, config = true },
+    { 'williamboman/mason.nvim', command = { "Mason" }, lazy = true, config = true },
     {
         'williamboman/mason-lspconfig.nvim',
         lazy = true,
@@ -314,6 +315,16 @@ require('lazy').setup({
             }
 
             nvim_lsp.zls.setup {
+                on_attach = on_attach,
+                capabilities = capabilities,
+            }
+
+            nvim_lsp.html.setup {
+                on_attach = on_attach,
+                capabilities = capabilities,
+            }
+
+            nvim_lsp.cssls.setup {
                 on_attach = on_attach,
                 capabilities = capabilities,
             }

@@ -222,7 +222,6 @@ require('lazy').setup({
     {
         'nvim-telescope/telescope.nvim',
         lazy = true,
-        tag = '0.1.1',
         keys = { 
             {
                 '<backspace>',
@@ -280,6 +279,7 @@ require('lazy').setup({
             ensure_installed = { 'clangd', 'rust_analyzer', 'tsserver' }
         }
     },
+    { 'p00f/clangd_extensions.nvim', lazy = true, ft = {'c', 'cpp'} },
     {
         'neovim/nvim-lspconfig',
         lazy = true,
@@ -342,6 +342,7 @@ require('lazy').setup({
             if (vim.regex('\\cStorage.XStore.src'):match_str(cwd)) then
                 compile_commands_dir = "--compile-commands-dir=" .. vim.fn.expand('~/.compiledb/XStore');
                 root_dir = cwd
+
                 if (vim.fn.executable( 'E:\\llvm-project-llvmorg-15.0.7\\llvm-project-llvmorg-15.0.7\\build\\RelWithDebInfo\\bin\\clangd.exe') ~= 0) then
                     clangd_exeutable = 'E:\\llvm-project-llvmorg-15.0.7\\llvm-project-llvmorg-15.0.7\\build\\RelWithDebInfo\\bin\\clangd.exe'
                 end
@@ -362,7 +363,12 @@ require('lazy').setup({
             end
 
             nvim_lsp.clangd.setup {
-                on_attach = on_attach,
+                on_attach = function(client, bufnr)
+                    on_attach(client, bufnr);
+                    require("clangd_extensions.inlay_hints").setup_autocmd()
+                    require("clangd_extensions.inlay_hints").set_inlay_hints()
+                    client.server_capabilities.semanticTokensProvider = nil
+                end,
                 capabilities = capabilities,
                 root_dir = function() return root_dir end,
                 cmd = { clangd_exeutable, '--pch-storage=memory', compile_commands_dir, '--background-index', '--offset-encoding=utf-16', '--clang-tidy' },
@@ -388,7 +394,7 @@ require('lazy').setup({
         end
     },
     {
-        'glepnir/lspsaga.nvim',
+        'nvimdev/lspsaga.nvim',
         ft = code_file_types,
         dependencies = { 'nvim-tree/nvim-web-devicons', 'neovim/nvim-lspconfig' },
         config = function ()
@@ -404,7 +410,6 @@ require('lazy').setup({
     },
 
     -- Completion
-    { 'hrsh7th/nvim-cmp', lazy = true },
     { 'hrsh7th/vim-vsnip', lazy = true },
     { 'hrsh7th/vim-vsnip-integ', lazy = true },
     { 'hrsh7th/cmp-nvim-lsp', lazy = true },
@@ -423,6 +428,7 @@ require('lazy').setup({
             'hrsh7th/cmp-path',
             'hrsh7th/cmp-cmdline',
             'windwp/nvim-autopairs',
+            'p00f/clangd_extensions.nvim',
         },
         config = function ()
             local cmp = require('cmp')
@@ -474,7 +480,19 @@ require('lazy').setup({
                     { name = 'vsnip' },
                 }, {
                     { name = 'buffer' },
-                })
+                }),
+                sorting = {
+                    comparators = {
+                        cmp.config.compare.offset,
+                        cmp.config.compare.exact,
+                        cmp.config.compare.recently_used,
+                        require("clangd_extensions.cmp_scores"),
+                        cmp.config.compare.kind,
+                        cmp.config.compare.sort_text,
+                        cmp.config.compare.length,
+                        cmp.config.compare.order,
+                    }
+                }
             })
 
             -- Use buffer source for `/` (if you enabled `native_menu`, this won't work anymore).

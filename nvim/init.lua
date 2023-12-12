@@ -278,7 +278,7 @@ require('lazy').setup({
             ensure_installed = { 'clangd', 'rust_analyzer', 'tsserver' }
         }
     },
-    { 'p00f/clangd_extensions.nvim', lazy = true },
+    { 'p00f/clangd_extensions.nvim', lazy = true, ft = {'c', 'cpp'} },
     {
         'neovim/nvim-lspconfig',
         lazy = true,
@@ -287,8 +287,6 @@ require('lazy').setup({
         config = function ()
             local nvim_lsp = require('lspconfig');
             local capabilities = require('cmp_nvim_lsp').default_capabilities()
-
-            capabilities.semanticTokensProvider = nil
 
             -- keybindings
             local on_attach = function(client, bufnr)
@@ -354,7 +352,12 @@ require('lazy').setup({
             end
 
             nvim_lsp.clangd.setup {
-                on_attach = on_attach,
+                on_attach = function(client, bufnr)
+                    on_attach(client, bufnr);
+                    require("clangd_extensions.inlay_hints").setup_autocmd()
+                    require("clangd_extensions.inlay_hints").set_inlay_hints()
+                    client.server_capabilities.semanticTokensProvider = nil
+                end,
                 capabilities = capabilities,
                 root_dir = function() return root_dir end,
                 cmd = { clangd_exeutable, '--pch-storage=memory', compile_commands_dir, '--background-index', '--offset-encoding=utf-16', '--clang-tidy' },
@@ -396,7 +399,6 @@ require('lazy').setup({
     },
 
     -- Completion
-    { 'hrsh7th/nvim-cmp', lazy = true },
     { 'hrsh7th/vim-vsnip', lazy = true },
     { 'hrsh7th/vim-vsnip-integ', lazy = true },
     { 'hrsh7th/cmp-nvim-lsp', lazy = true },
@@ -415,6 +417,7 @@ require('lazy').setup({
             'hrsh7th/cmp-path',
             'hrsh7th/cmp-cmdline',
             'windwp/nvim-autopairs',
+            'p00f/clangd_extensions.nvim',
         },
         config = function ()
             local cmp = require('cmp')
@@ -466,7 +469,19 @@ require('lazy').setup({
                     { name = 'vsnip' },
                 }, {
                     { name = 'buffer' },
-                })
+                }),
+                sorting = {
+                    comparators = {
+                        cmp.config.compare.offset,
+                        cmp.config.compare.exact,
+                        cmp.config.compare.recently_used,
+                        require("clangd_extensions.cmp_scores"),
+                        cmp.config.compare.kind,
+                        cmp.config.compare.sort_text,
+                        cmp.config.compare.length,
+                        cmp.config.compare.order,
+                    }
+                }
             })
 
             -- Use buffer source for `/` (if you enabled `native_menu`, this won't work anymore).

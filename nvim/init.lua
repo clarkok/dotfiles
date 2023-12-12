@@ -221,7 +221,6 @@ require('lazy').setup({
     {
         'nvim-telescope/telescope.nvim',
         lazy = true,
-        tag = '0.1.1',
         keys = { 
             {
                 '<backspace>',
@@ -279,6 +278,7 @@ require('lazy').setup({
             ensure_installed = { 'clangd', 'rust_analyzer', 'tsserver' }
         }
     },
+    { 'p00f/clangd_extensions.nvim', lazy = true },
     {
         'neovim/nvim-lspconfig',
         lazy = true,
@@ -287,6 +287,8 @@ require('lazy').setup({
         config = function ()
             local nvim_lsp = require('lspconfig');
             local capabilities = require('cmp_nvim_lsp').default_capabilities()
+
+            capabilities.semanticTokensProvider = nil
 
             -- keybindings
             local on_attach = function(client, bufnr)
@@ -331,6 +333,7 @@ require('lazy').setup({
             if (vim.regex('\\cStorage.XStore.src'):match_str(cwd)) then
                 compile_commands_dir = "--compile-commands-dir=" .. vim.fn.expand('~/.compiledb/XStore');
                 root_dir = cwd
+
                 if (vim.fn.executable( 'E:\\llvm-project-llvmorg-15.0.7\\llvm-project-llvmorg-15.0.7\\build\\RelWithDebInfo\\bin\\clangd.exe') ~= 0) then
                     clangd_exeutable = 'E:\\llvm-project-llvmorg-15.0.7\\llvm-project-llvmorg-15.0.7\\build\\RelWithDebInfo\\bin\\clangd.exe'
                 end
@@ -377,7 +380,7 @@ require('lazy').setup({
         end
     },
     {
-        'glepnir/lspsaga.nvim',
+        'nvimdev/lspsaga.nvim',
         ft = code_file_types,
         dependencies = { 'nvim-tree/nvim-web-devicons', 'neovim/nvim-lspconfig' },
         config = function ()

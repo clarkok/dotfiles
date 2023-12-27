@@ -84,3 +84,8 @@ validator
 Substr
 Resize
 metadata
+Rect
+Malloc
+Eval
+Const
+Proto

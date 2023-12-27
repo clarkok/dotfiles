@@ -67,6 +67,7 @@ require('lazy').setup({
     'PProvost/vim-ps1',
     'rust-lang/rust.vim',
     'ziglang/zig.vim',
+    'neoclide/jsonc.vim',
 
     -- Colorschemes
     'endel/vim-github-colorscheme',
@@ -239,6 +240,7 @@ require('lazy').setup({
             vim.keymap.set('n', '<leader>fb', builtin.buffers, {})
             vim.keymap.set('n', '<leader>fr', builtin.lsp_references, {})
             vim.keymap.set('n', '<leader>fd', builtin.diagnostics, {})
+            vim.keymap.set('n', '<leader>fg', builtin.live_grep, {})
 
             local actions = require('telescope.actions')
 

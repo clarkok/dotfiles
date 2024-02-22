@@ -84,3 +84,12 @@ validator
 Substr
 Resize
 metadata
+renderer
+Ctrl
+Rect
+Rect
+treesitter
+const
+const
+Bezier
+leveldb

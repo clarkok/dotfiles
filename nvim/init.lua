@@ -141,6 +141,8 @@ require('lazy').setup({
                 command = 'autocmd! BufWritePre * undojoin | Neoformat',
                 group = group
             })
+            vim.g.neoformat_enabled_javascript = {'prettierd'}
+            vim.g.neoformat_enabled_typescript = {'prettierd'}
         end
     },
 
@@ -204,7 +206,12 @@ require('lazy').setup({
             }
         end
     },
-    { 'nvim-treesitter/playground',                  lazy = true,         cmd = 'TSPlaygroundToggle', dependencies = { 'nvim-treesitter/nvim-treesitter' } },
+    {
+        'nvim-treesitter/playground',
+        lazy = true,
+        cmd = 'TSPlaygroundToggle',
+        dependencies = { 'nvim-treesitter/nvim-treesitter' }
+    },
 
     -- File Management
     {

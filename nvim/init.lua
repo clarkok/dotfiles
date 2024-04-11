@@ -329,21 +329,25 @@ require('lazy').setup({
             -- clangd section
             local compile_commands_dir
             local root_dir
-            local clangd_exeutable = 'clangd'
+            -- local clangd_exeutable = 'clangd'
 
+            --[[
             if (vim.fn.executable('C:\\Program Files\\LLVM\\bin\\clangd.exe') ~= 0) then
                 clangd_exeutable = 'C:\\Program Files\\LLVM\\bin\\clangd.exe'
             end
+            --]]
 
             local cwd = vim.fn.getcwd()
             if (vim.regex('\\cStorage.XStore.src'):match_str(cwd)) then
                 compile_commands_dir = "--compile-commands-dir=" .. vim.fn.expand('~/.compiledb/XStore');
                 root_dir = cwd
 
+                --[[
                 if (vim.fn.executable('E:\\llvm-project-llvmorg-15.0.7\\llvm-project-llvmorg-15.0.7\\build\\RelWithDebInfo\\bin\\clangd.exe') ~= 0) then
                     clangd_exeutable =
                     'E:\\llvm-project-llvmorg-15.0.7\\llvm-project-llvmorg-15.0.7\\build\\RelWithDebInfo\\bin\\clangd.exe'
                 end
+                --]]
             elseif (vim.fn.filereadable(cwd .. '/build/compile_commands.json') ~= 0) then
                 compile_commands_dir = "--compile-commands-dir=" .. vim.fn.expand(cwd .. '/build')
                 root_dir = cwd
@@ -369,7 +373,7 @@ require('lazy').setup({
                 end,
                 capabilities = capabilities,
                 root_dir = function() return root_dir end,
-                cmd = { clangd_exeutable, '--pch-storage=memory', compile_commands_dir, '--background-index', '--offset-encoding=utf-16', '--clang-tidy' },
+                cmd = { 'clangd', '--pch-storage=memory', compile_commands_dir, '--background-index', '--offset-encoding=utf-16', '--clang-tidy' },
             }
 
             Autocmd('BufWritePre', {

@@ -41,7 +41,7 @@ Map('n', '<c-k>', '<c-w>k', { noremap = true })
 Map('n', '<c-l>', '<c-w>l', { noremap = true })
 
 local code_file_types = { 'cpp', 'c', 'python', 'javascript', 'vim', 'rust', 'typescript', 'markdown', 'html', 'css',
-    'zig', 'lua', 'cmake', 'json', 'jsonc', 'glsl' }
+    'zig', 'lua', 'cmake', 'json', 'jsonc', 'glsl', 'markdown_inline' }
 local neo_format_types = { 'javascript', 'typescript', 'rust', 'json', 'jsonc' }
 local clang_format_black_pattern_list = { 'XTable', 'XBlobContainerServer', 'quickjs' }
 local lsp_ensure_installed = {  'clangd', 'rust_analyzer', 'tsserver', 'html', 'cssls', 'lua_ls', 'cmake' }
@@ -81,7 +81,10 @@ require('lazy').setup({
     {
         'nvim-lualine/lualine.nvim',
         config = true,
-        dependencies = { 'nvim-tree/nvim-web-devicons', 'jcdickinson/wpm.nvim' },
+        dependencies = {
+            'nvim-tree/nvim-web-devicons',
+            'jcdickinson/wpm.nvim',
+        },
         config = function()
             local wpm = require('wpm')
             require('lualine').setup {
@@ -409,6 +412,12 @@ require('lazy').setup({
             vim.keymap.set('n', '<leader>rn', '<cmd>Lspsaga rename<CR>')
             vim.keymap.set('n', '<leader>ca', '<cmd>Lspsaga code_action<CR>')
         end,
+    },
+    {
+        'j-hui/fidget.nvim',
+        ft = code_file_types,
+        dependencies = { 'neovim/nvim-lspconfig' },
+        config = true,
     },
 
     -- Completion

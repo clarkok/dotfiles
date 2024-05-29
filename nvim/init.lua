@@ -41,10 +41,11 @@ Map('n', '<c-k>', '<c-w>k', { noremap = true })
 Map('n', '<c-l>', '<c-w>l', { noremap = true })
 
 local code_file_types = { 'cpp', 'c', 'python', 'javascript', 'vim', 'rust', 'typescript', 'markdown', 'html', 'css',
-    'zig', 'lua', 'cmake', 'json', 'jsonc', 'glsl', 'markdown_inline' }
+    'zig', 'lua', 'cmake', 'json', 'jsonc', 'glsl', 'markdown_inline', 'vimdoc' }
 local neo_format_types = { 'javascript', 'typescript', 'rust', 'json', 'jsonc' }
 local clang_format_black_pattern_list = { 'XTable', 'XBlobContainerServer', 'quickjs' }
-local lsp_ensure_installed = {  'clangd', 'rust_analyzer', 'tsserver', 'html', 'cssls', 'lua_ls', 'cmake' }
+local neo_format_black_pattern_list = { 'tree%-sitter%-cpp' }
+local lsp_ensure_installed = {  'rust_analyzer', 'tsserver', 'html', 'cssls', 'lua_ls', 'cmake' }
 
 -- bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -80,7 +81,6 @@ require('lazy').setup({
     'nvim-tree/nvim-web-devicons',
     {
         'nvim-lualine/lualine.nvim',
-        config = true,
         dependencies = {
             'nvim-tree/nvim-web-devicons',
             'jcdickinson/wpm.nvim',
@@ -126,9 +126,11 @@ require('lazy').setup({
         'github/copilot.vim',
         lazy = true,
         ft = code_file_types,
-        config = function()
-            vim.api.nvim_set_keymap('i', '<C-J>', 'copilot#Accept("\\<CR>")',
-                { silent = true, script = true, expr = true })
+        config = function() 
+            vim.keymap.set('i', '<C-J>', 'copilot#Accept("\\<CR>")', {
+                expr = true,
+                replace_keycodes = false
+            })
             vim.g.copilot_no_tab_map = true
         end
     },
@@ -141,7 +143,17 @@ require('lazy').setup({
             local group = Augroup('NeoFormat', {})
             Autocmd('FileType', {
                 pattern = neo_format_types,
-                command = 'autocmd! BufWritePre * undojoin | Neoformat',
+                callback = function(args)
+                    local path = vim.fn.expand('%:p:h')
+                    -- print(path)
+                    for _, item in ipairs(neo_format_black_pattern_list) do
+                        if string.find(path, item) then
+                            return
+                        end
+                    end
+
+                    vim.cmd('autocmd! BufWritePre * undojoin | Neoformat')
+                end,
                 group = group
             })
             vim.g.neoformat_enabled_javascript = {'prettierd'}
@@ -159,6 +171,17 @@ require('lazy').setup({
         cmd = { 'TSInstall', 'TSUpdate', 'TSUpdateSync' },
         dependencies = { 'nvim-treesitter/nvim-treesitter-textobjects', 'nvim-treesitter/nvim-treesitter-context' },
         config = function()
+            if (vim.fn.filereadable('~/Documents/tree-sitter-cpp/grammar.js')) then
+                local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
+                parser_config['cpp'] = {
+                    install_info = {
+                        url = '~/Documents/tree-sitter-cpp',
+                        files = { "src/parser.c", "src/scanner.c" },
+                        generate_requires_npm = true
+                    }
+                }
+            end
+
             require('nvim-treesitter.install').compilers = { 'clang', 'gcc' }
 
             require('nvim-treesitter.configs').setup {
@@ -209,12 +232,7 @@ require('lazy').setup({
             }
         end
     },
-    {
-        'nvim-treesitter/playground',
-        lazy = true,
-        cmd = 'TSPlaygroundToggle',
-        dependencies = { 'nvim-treesitter/nvim-treesitter' }
-    },
+    { 'nvim-treesitter/playground', lazy = true, cmd = 'TSPlaygroundToggle', dependencies = { 'nvim-treesitter/nvim-treesitter' } },
 
     -- File Management
     {
@@ -332,25 +350,16 @@ require('lazy').setup({
             -- clangd section
             local compile_commands_dir
             local root_dir
-            -- local clangd_exeutable = 'clangd'
+            local clangd_exeutable = 'clangd'
 
-            --[[
             if (vim.fn.executable('C:\\Program Files\\LLVM\\bin\\clangd.exe') ~= 0) then
                 clangd_exeutable = 'C:\\Program Files\\LLVM\\bin\\clangd.exe'
             end
-            --]]
 
             local cwd = vim.fn.getcwd()
             if (vim.regex('\\cStorage.XStore.src'):match_str(cwd)) then
                 compile_commands_dir = "--compile-commands-dir=" .. vim.fn.expand('~/.compiledb/XStore');
                 root_dir = cwd
-
-                --[[
-                if (vim.fn.executable('E:\\llvm-project-llvmorg-15.0.7\\llvm-project-llvmorg-15.0.7\\build\\RelWithDebInfo\\bin\\clangd.exe') ~= 0) then
-                    clangd_exeutable =
-                    'E:\\llvm-project-llvmorg-15.0.7\\llvm-project-llvmorg-15.0.7\\build\\RelWithDebInfo\\bin\\clangd.exe'
-                end
-                --]]
             elseif (vim.fn.filereadable(cwd .. '/build/compile_commands.json') ~= 0) then
                 compile_commands_dir = "--compile-commands-dir=" .. vim.fn.expand(cwd .. '/build')
                 root_dir = cwd
@@ -376,11 +385,11 @@ require('lazy').setup({
                 end,
                 capabilities = capabilities,
                 root_dir = function() return root_dir end,
-                cmd = { 'clangd', '--pch-storage=memory', compile_commands_dir, '--background-index', '--offset-encoding=utf-16', '--clang-tidy' },
+                cmd = { clangd_exeutable, '--pch-storage=memory', compile_commands_dir, '--background-index', '--offset-encoding=utf-16', '--clang-tidy' },
             }
 
             Autocmd('BufWritePre', {
-                pattern = '*.cpp,*.h,*.hpp,*.c,*.cc',
+                pattern = '*.cpp,*.h,*.hpp,*.c,*.cc,*.cppm,*.ixx',
                 callback = function(args)
                     local path = vim.fn.expand('%:p:h')
                     for _, item in ipairs(clang_format_black_pattern_list) do
@@ -488,6 +497,7 @@ require('lazy').setup({
                     end, { "i", "s" }),
                 }),
                 sources = cmp.config.sources({
+                    { name = 'path' },
                     { name = 'nvim_lsp' },
                     { name = 'vsnip' },
                 }, {
@@ -614,4 +624,9 @@ Autocmd('BufWritePost', {
             end
         end, 1000)
     end
+})
+
+Autocmd({ 'BufRead', 'BufNewFile' }, {
+    pattern = '*.cppm,*.ixx',
+    command = 'set filetype=cpp'
 })

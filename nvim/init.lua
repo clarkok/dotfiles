@@ -45,7 +45,7 @@ local code_file_types = { 'cpp', 'c', 'python', 'javascript', 'vim', 'rust', 'ty
 local neo_format_types = { 'javascript', 'typescript', 'rust', 'json', 'jsonc' }
 local clang_format_black_pattern_list = { 'XTable', 'XBlobContainerServer', 'quickjs' }
 local neo_format_black_pattern_list = { 'tree%-sitter%-cpp' }
-local lsp_ensure_installed = {  'rust_analyzer', 'tsserver', 'html', 'cssls', 'lua_ls', 'cmake' }
+local lsp_ensure_installed = {  'rust_analyzer', 'ts_ls', 'html', 'cssls', 'lua_ls', 'cmake' }
 
 -- bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -171,17 +171,6 @@ require('lazy').setup({
         cmd = { 'TSInstall', 'TSUpdate', 'TSUpdateSync' },
         dependencies = { 'nvim-treesitter/nvim-treesitter-textobjects', 'nvim-treesitter/nvim-treesitter-context' },
         config = function()
-            if (vim.fn.filereadable('~/Documents/tree-sitter-cpp/grammar.js')) then
-                local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
-                parser_config['cpp'] = {
-                    install_info = {
-                        url = '~/Documents/tree-sitter-cpp',
-                        files = { "src/parser.c", "src/scanner.c" },
-                        generate_requires_npm = true
-                    }
-                }
-            end
-
             require('nvim-treesitter.install').compilers = { 'clang', 'gcc' }
 
             require('nvim-treesitter.configs').setup {

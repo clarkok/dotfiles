@@ -22,12 +22,14 @@ vim.o.guifont = 'Consolas:h8'
 vim.o.listchars = 'tab:▸\\ ,eol:¬'
 vim.o.fixeol = false
 vim.o.completeopt = 'menu,menuone,noselect'
+vim.o.spell = true
+vim.o.spelllang = 'en_us'
 
 -- disable netrw the built-in vim file explorer
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
--- enable highligh groups
+-- enable highlight groups
 vim.opt.termguicolors = true
 
 Autocmd = vim.api.nvim_create_autocmd
@@ -73,20 +75,22 @@ require('lazy').setup({
     'neoclide/jsonc.vim',
     'tikhomirov/vim-glsl',
 
-    -- Colorschemes
-    'endel/vim-github-colorscheme',
+    -- Color Schemes
+    {
+        'endel/vim-github-colorscheme',
+        config = function()
+            Cmd('colorscheme github')
+        end
+    },
 
     -- Lualine
-    { 'jcdickinson/wpm.nvim',    config = true },
     'nvim-tree/nvim-web-devicons',
     {
         'nvim-lualine/lualine.nvim',
         dependencies = {
             'nvim-tree/nvim-web-devicons',
-            'jcdickinson/wpm.nvim',
         },
         config = function()
-            local wpm = require('wpm')
             require('lualine').setup {
                 options = {
                     theme                = 'ayu_light',
@@ -96,7 +100,6 @@ require('lazy').setup({
                 sections = {
                     lualine_c = { function() return vim.fn.expand('%') end },
                     lualine_x = {
-                        function() return 'WPM: ' .. require('wpm').wpm() .. require('wpm').historic_graph() end,
                         function() return 'Buf: ' .. table.getn(vim.api.nvim_list_bufs()) end
                     }
                 }
@@ -105,7 +108,6 @@ require('lazy').setup({
     },
 
     -- Editing
-    { 'kamykn/CCSpellCheck.vim', lazy = true,  ft = code_file_types },
     {
         'windwp/nvim-autopairs',
         lazy = true,
@@ -531,57 +533,7 @@ require('lazy').setup({
             )
         end
     },
-
-    -- leetcode
-    {
-        "kawre/leetcode.nvim",
-        lazy = "leetcode.nvim" ~= vim.fn.argv()[1],
-        cmd = "Leet",
-        build = ":TSUpdate html",
-        dependencies = {
-            "nvim-telescope/telescope.nvim",
-            "nvim-lua/plenary.nvim", -- required by telescope
-            "MunifTanjim/nui.nvim",
-
-            -- optional
-            "nvim-treesitter/nvim-treesitter",
-            "rcarriga/nvim-notify",
-            "nvim-tree/nvim-web-devicons",
-        },
-        opts = {
-            -- configuration goes here
-            arg = "leetcode.nvim",
-
-            lang = "cpp",
-
-            cn = { -- leetcode.cn
-                enabled = true, ---@type boolean
-                translator = false, ---@type boolean
-                translate_problems = false, ---@type boolean
-            },
-
-            storage = {
-                home = vim.fn.stdpath("data") .. "/leetcode",
-                cache = vim.fn.stdpath("cache") .. "/leetcode",
-            },
-
-            logging = true,
-
-            keys = {
-                toggle = { "q", "<Esc>" }, ---@type string|string[]
-                confirm = { "<CR>" }, ---@type string|string[]
-
-                reset_testcases = "r", ---@type string
-                use_testcase = "U", ---@type string
-                focus_testcases = "H", ---@type string
-                focus_result = "L", ---@type string
-            },
-        },
-    }
 })
-
-Cmd('colorscheme github')
-Cmd('highlight CCSpellBad cterm=reverse ctermfg=magenta gui=reverse guifg=magenta')
 
 local markdownGroup = Augroup('Markdown', {})
 Autocmd('InsertLeave', {
@@ -591,11 +543,6 @@ Autocmd('InsertLeave', {
             vim.cmd([[gwap<CR>]])
         end
     end,
-    group = markdownGroup
-})
-Autocmd('FileType', {
-    pattern = 'markdown',
-    command = 'set spell spelllang=en_us',
     group = markdownGroup
 })
 Autocmd('FileType', {

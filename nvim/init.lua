@@ -370,8 +370,6 @@ require('lazy').setup({
             nvim_lsp.clangd.setup {
                 on_attach = function(client, bufnr)
                     on_attach(client, bufnr);
-                    require("clangd_extensions.inlay_hints").setup_autocmd()
-                    require("clangd_extensions.inlay_hints").set_inlay_hints()
                     client.server_capabilities.semanticTokensProvider = nil
                 end,
                 capabilities = capabilities,

@@ -348,7 +348,7 @@ require('lazy').setup({
             end
 
             local cwd = vim.fn.getcwd()
-            if (vim.regex('\\cStorage.XStore.src'):match_str(cwd)) then
+            if (vim.regex('\\cStorage.XStore.src'):match_str(cwd) or vim.regex('\\cStorage-XStore'):match_str(cwd)) then
                 compile_commands_dir = "--compile-commands-dir=" .. vim.fn.expand('~/.compiledb/XStore');
                 root_dir = cwd
             elseif (vim.fn.filereadable(cwd .. '/build/compile_commands.json') ~= 0) then
